@@ -1,0 +1,10 @@
+#PRÓXIMOS PASSOS
+
+Aprender como estruturar Orientado a objetos arquivos Node
+
+Mapear rotas como:
+
+Conferir se usuário possui cadastro
+Múltiplas consultas
+
+como estruturar expressjs

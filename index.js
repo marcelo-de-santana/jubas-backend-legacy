@@ -1,26 +1,26 @@
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const env = require('dotenv').config().parsed;
 const express = require('express');
-const dbConn = require('./mysql')
+const dbConn = require('./src/services/mysql')
 
-//REQUISIÇÃO DAS VARIÁVEIS DE AMBIENTE
-const port = env['SV_PORT'] || 3000;
+//VARIÁVEIS DE AMBIENTE
+const sv = require('./src/config/environment.json').server
 
 //CONFIGURAÇÃO DO FRAMEWORK
-let app = express();
+const app = express();
 app.use(cors());
+
 //REQUISIÇÕES POST
 app.use(bodyParser.urlencoded({extended:false}));
+
 //REQUISIÇÕES JSON
 app.use(bodyParser.json());
 
 //DIRECIONANDO PORTA DO SERVIDOR
-app.listen(port);
+app.listen(sv.port || 3000);
 
-//ROUTES
-//CADASTRO CLIENTE
-app.post('/sign-up', async(req,res)=>{
+//ROTAS DO CLIENTE
+app.post('/sign-up', (req,res)=>{
     let postVars = {
         cpf: req.body.cpf,
         nome: req.body.name,
@@ -38,7 +38,7 @@ app.post('/sign-up', async(req,res)=>{
 });
 
 //LOGIN CLIENTE
-app.post('/check-in', (req,res)=>{
+app.get('/check-in', (req,res)=>{
     let sql = `SELECT COUNT(*) AS valor FROM cliente WHERE email = "${req.body.email}" AND senha = "${req.body.password}"`;
     dbConn.query(sql, (err,results) => {
         if(err) throw err;
@@ -47,8 +47,7 @@ app.post('/check-in', (req,res)=>{
 });
 
 //BUSCA BARBEIROS
-app.post('/barbers',(req,res)=>{
-    console.log('rota chamada')
+app.get('/barbers', (req,res)=>{
     let sql = `
         SELECT e.id_barbeiro, e.horario, b.nome
         FROM expediente AS e
@@ -61,8 +60,7 @@ app.post('/barbers',(req,res)=>{
 })
 
 //HORÁRIOS DE ATENDIMENTO
-app.post('/service-hours',(req,res)=>{
-    console.log('rota chamada')
+app.get('/schedule',(req,res)=>{
     let sql = `SELECT * FROM expediente`;
     dbConn.query(sql, (err,result)=>{
         if(err) throw err;
@@ -72,10 +70,8 @@ app.post('/service-hours',(req,res)=>{
 
 //ROTAS PARA TESTE
 
-
 //BUSCA BARBEIROS
 app.get('/barbers',(req,res)=>{
-    console.log('rota chamada')
     let sql = `
         SELECT e.id_barbeiro, e.horario, b.nome
         FROM expediente AS e
