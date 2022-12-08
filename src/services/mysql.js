@@ -1,4 +1,4 @@
-const db = require('../../../jubas-app/src/config/environment.json').database
+const db = require('../config/environment.json').database
 const mysql = require('mysql');
 
 //CONECTANDO O BANCO DE DADOS
