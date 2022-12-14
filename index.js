@@ -1,1 +1,1 @@
-const app = require("./src/router/client.js");
+const app = require("./src/router/client");

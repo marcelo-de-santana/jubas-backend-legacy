@@ -1,5 +1,11 @@
-const app = require('../services/express');
+const express = require("express");
 const dbConn = require('../services/mysql');
+const sv = require("../config/environment.json").server;
+
+const app = express();
+
+//DIRECIONANDO PORTA DO SERVIDOR
+app.listen(sv.port || 3000);
 
 //ROTAS DO CLIENTE
 app.post('/sign-up', (req,res)=>{
@@ -53,12 +59,22 @@ app.get('/schedule',(req,res)=>{
 //ROTAS PARA TESTE
 
 //BUSCA BARBEIROS
-app.get('/barbers',(req,res)=>{
+app.get('/barberss',(req,res)=>{
     let sql = `
         SELECT e.id_barbeiro, e.horario, b.nome
         FROM expediente AS e
         INNER JOIN barbeiro AS b
         ON e.id_barbeiro = b.id;`;
+    dbConn.query(sql, (err,results)=>{
+        if(err) throw err;
+        res.json(results)
+    })
+})
+
+//BUSCA BARBEIROS
+app.get('/',(req,res)=>{
+    let sql = `
+        SELECT * FROM cliente;`;
     dbConn.query(sql, (err,results)=>{
         if(err) throw err;
         res.json(results)
