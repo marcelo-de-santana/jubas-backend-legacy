@@ -47,6 +47,22 @@
         })
     });
 //ALTERAR CADASTRO
+    router.get('/:id', (req,res)=>{
+        let sql = `SELECT * FROM cliente WHERE id = ?`;
+        let id = req.params.id
+        
+        dbConn.query(sql,id, (err,fields,results)=>{
+            res.send(fields)
+        })
+    });
 
-
+    router.post('/:id', (req,res)=>{
+        let sql = `UPDATE cliente SET ? WHERE id = ?`
+        let id = req.params.id
+        let postVars = req.body
+        
+        dbConn.query(sql,postVars,id, (err,fields,results)=>{
+            console.log(fields)
+        })
+    });
 
