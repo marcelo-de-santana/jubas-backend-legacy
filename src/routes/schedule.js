@@ -7,8 +7,8 @@
     module.exports = router;
 
 //AGENDA
-    router.get('/schedule',(req,res)=>{
-        let sql = `SELECT * FROM expediente`;
+    router.get('/',(req,res)=>{
+        let sql = `SELECT * FROM agenda`;
         
         dbConn.query(sql, (err,result)=>{
             if(err) throw err;

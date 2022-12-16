@@ -8,7 +8,7 @@
 
 //BUSCA BARBEIROS
     router.get('/',(req,res)=>{
-        let sql = `SELECT * FROM cliente;`;
+        let sql = `SELECT * FROM barbeiro`;
         
         dbConn.query(sql, (err,results)=>{
             if(err) throw err;

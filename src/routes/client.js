@@ -8,7 +8,7 @@
 
 /**Regra de negócio 1.1 */
 //LOGIN
-    router.get('/check-in', (req,res)=>{
+    router.post('/check-in', (req,res)=>{
         let sql = `SELECT COUNT(*) AS valor FROM cliente WHERE email = "${req.body.email}" AND senha = "${req.body.password}"`;
         
         dbConn.query(sql, (err,results) => {
@@ -59,10 +59,16 @@
     router.post('/:id', (req,res)=>{
         let sql = `UPDATE cliente SET ? WHERE id = ?`
         let id = req.params.id
-        let postVars = req.body
+        let postVars = {
+            email:              req.body.email,
+            nome:               req.body.nome,
+            telefone:           req.body.telefone,
+            senha:              req.body.senha,
+            data_de_nascimento: req.body.nascimento
+        }
         
-        dbConn.query(sql,postVars,id, (err,fields,results)=>{
-            console.log(fields)
-        })
+        //dbConn.query(sql,postVars,id, (err,fields,results)=>{
+        //    console.log(fields)
+        //})
     });
 
