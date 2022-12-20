@@ -15,8 +15,11 @@ module.exports = router;
         })
     });
 
-    router.get('/desc',(req,res)=>{
-        let sql = `DESC agenda`
+
+    //TESTE DE ROTA PARA PÁGINA DE FILA DE ATENDIMENTOS
+    router.get('/schedule',(req,res)=>{
+        let sql = `SELECT b.id, b.nome, e.horario_inicio, e.horario_fim, e.intervalo_inicio, e.intervalo_fim
+        FROM barbeiro AS b INNER JOIN expediente AS e ON b.id = e.id_barbeiro;`
         dbConn.query(sql, (err,fields,results)=>{
             if(err) throw err;
             res.send(fields)
