@@ -1,4 +1,4 @@
-# Express API for the Jubas App
+# Node API for the Jubas App
 
 This is an application responsible for the backend of the [jubas-app](https://github.com/marcelo-de-santana/jubas-app).The data is accessed from the MySQL database.
 
