@@ -1,6 +1,6 @@
 -- Apresentação de Dados
 
---UMA QUERY QUE SELECIONA O ID,NOME e HORARIOS DISPONÍVEIS PARA DETERMINADO BARBEIRO
+--UMA QUERY QUE SELECIONA O ID,NOME E MAIS OS HORARIOS DISPONÍVEIS PARA DETERMINADO BARBEIRO
 
 SELECT b.id, b.nome, e.horario_inicio, e.horario_fim, e.intervalo_inicio, e.intervalo_fim
 FROM barbeiros AS b

@@ -2,55 +2,70 @@ const express = require("express");
 const router = express.Router();
 const dbConn = require('../services/mysql');
 const bodyParser = require("body-parser");
-const {createPool} = require("mysql");
+const { createPool } = require("mysql");
 
 module.exports = router;
 
-router.get('/', async (req,res) => {
+/** @GET **/
+
+/** BUSCAR AGENDA DA BARBEARIA **/
+router.get('/', async (req, res, next) => {
     let sql = `SELECT b.id, b.nome, e.horario_inicio, e.horario_fim, e.intervalo_inicio, e.intervalo_fim
                 FROM barbeiros AS b INNER JOIN expediente AS e ON b.id = e.id_barbeiro`;
 
-    const result = await dbConn.execute(sql);
-        //MONTAGEM DA AGENDA
+    let barbers = await dbConn.execute(sql);
 
-    //VALORES DO EXPEDIÊNTE
-    function morningShift(values){
-        let workStart = timeSeparator(values.horario_inicio);
-        let workEnd = timeSeparator(values.horario_fim);
-        let time = [];
-        for (let i = workStart[0]; i <=workEnd[0]; i++){
-            workStart[0] = i;
+    let hours = await dbConn.execute('SELECT * FROM calendario_diario');
 
-            if(workStart[1] == 0) {
-                time.push(`${workStart[0]}:${workStart[1]}`)
-                workStart[1] = 30;
-            } else {
-                time.push(`${workStart[0]}:${workStart[1]}`)
-                workStart[1] = '00'
+    /**
+     * Função responsável por retornar todos os horários em que o barbeiro estará disponível
+     * @param {*} values 
+     * @returns Array 
+     */
+    function getAvailableTimes(values) {
+
+        //PREENCHE OS HORÁRIOS DISPONÍVEIS E RETORNA SEM OS HORARIOS DE ATENDIMENTO PREENCHIDOS
+        let arrFilter = (hours.filter(item => {
+            if (item.horarios >= values.horario_inicio && item.horarios <= values.horario_fim) {
+                return item.horarios < values.intervalo_inicio || item.horarios >= values.intervalo_fim || item.horarios == values.horarios_marcados;
             }
+
+        }));
+
+        return arrFilter.map(item => { return item.horarios });
+    
+    }
+
+    /**
+     * Função responsável por retornar os horários que o barbeiro não está disponível
+     * @param {*} values 
+     * @returns Array
+     * 
+     */
+    function getUnavailableTimes(values) {
+        
+        let arrFilter = (hours.filter(item => {    
+            if (item.horarios >= values.intervalo_inicio && item.horarios < values.intervalo_fim || item.horarios == values.horarios_marcados) {
+                return item.horarios
+            }
+        }));
+
+        return arrFilter.map(item => { return item.horarios });
+    
+    }
+
+    //CORPO DA AGENDA
+    schedule = barbers.map(values => {
+        return {
+            id: values.id,
+            name: values.nome,
+            available_times: getAvailableTimes(values),
+            unavailable_times: getUnavailableTimes(values),
+            office_hour: [values.horario_inicio, values.horario_fim],
+            office_break: [values.intervalo_inicio, values.intervalo_fim],
         }
-        return time;
-    }
-    //FUNĆÃO RESPONSÁVEL POR SEPARAR OS VALORES DA LISTA
-    function timeSeparator(array){
-        let hour = [];
-        array.split(':').map(value => {
-            if (Number(value) == 0) {
-                hour.push('00')
-            } else {
-                hour.push(Number(value))
-            }
-        });
-        return hour;
-    }
+    })
 
-    const schedule = result.map((values,key) => {
-       return {
-           id: values.id,
-           name: values.nome,
-           horarios_disponíveis: morningShift(values)
-       }
-    });
+    res.status(200).send(schedule)
 
-    res.status(200).send(schedule);
-});
+})

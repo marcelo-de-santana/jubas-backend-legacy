@@ -40,11 +40,17 @@ CREATE TABLE barbeiros (
 -- Estrutura para tabela expediente do barbeiro
 
 CREATE TABLE expediente(
-id_barbeiro INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-horario_inico VARCHAR(5),
-horario_fim VARCHAR(5),
-intervalo_inicio VARCHAR(5),
-intervalo_fim VARCHAR(5)
+id_barbeiro INT NOT NULL PRIMARY KEY,
+horario_inicio TIME,
+horario_fim TIME,
+intervalo_inicio TIME,
+intervalo_fim TIME
+);
+----------------------------------------------------------
+
+-- Estrutura para tabela de horarios de atendimento
+CREATE TABLE calendario_diario(
+  horarios TIME
 );
 
 ----------------------------------------------------------
@@ -88,12 +94,6 @@ INSERT INTO clientes (cpf,email,nome,telefone,senha,data_de_nascimento,data_de_c
 ("000.111.000-00","rcasa@exemplo.com","Rodrigo Casa","(61) 99999-8888","12345678","2002-01-02 00:00:00","2022-11-24 02:00:00"),
 ("111.111.000-00","josea@teste.com","Jose Antonio","(61) 99322-0000","12345678","2000-03-03 00:00:00","2022-12-15 03:00:00");
 
-INSERT INTO expediente (id_barbeiro,horario) VALUES
-(1, '08:00'),
-(1, '08:30'),
-(2, '08:00'),
-(2, '08:30');
-
 INSERT INTO barbeiros (id, nome) VALUES
 (1, 'Reis Melo'),
 (2, 'Gerson de Castro'),
@@ -101,6 +101,25 @@ INSERT INTO barbeiros (id, nome) VALUES
 (4, 'Gabriel Navalha'),
 (5, 'João Marcos');
 
+INSERT INTO expediente (id_barbeiro,horario_inicio,horario_fim,intervalo_inicio,intervalo_fim) VALUES
+(1, '08:00:00','16:00:00','12:00:00','13:00:00'),
+(2, '08:30:00','16:30:00','12:30:00','13:30:00'),
+(3, '10:00:00','18:00:00','14:00:00','15:00:00');
 
-
+INSERT INTO calendario_diario (horarios) VALUES
+('06:00:00'),('06:30:00'),
+('07:00:00'),('07:30:00'),
+('08:00:00'),('08:30:00'),
+('09:00:00'),('09:30:00'),
+('10:00:00'),('10:30:00'),
+('11:00:00'),('11:30:00'),
+('12:00:00'),('12:30:00'),
+('13:00:00'),('13:30:00'),
+('14:00:00'),('14:30:00'),
+('15:00:00'),('15:30:00'),
+('16:00:00'),('16:30:00'),
+('17:00:00'),('17:30:00'),
+('18:00:00'),('18:30:00'),
+('19:00:00'),('19:30:00'),
+('20:00:00'),('20:30:00');
 ----------------------------------------------------------

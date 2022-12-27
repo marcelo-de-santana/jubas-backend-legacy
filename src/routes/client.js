@@ -5,6 +5,7 @@ const dbConn = require('../services/mysql');
 module.exports = router;
 
 /** @POST **/
+
 /** REALIZAR LOGIN CLIENTE **/
 router.post('/check-in', async (req,res,next) => {
     let sql = `SELECT * FROM clientes WHERE email = ? AND senha = ?`;
@@ -42,6 +43,7 @@ router.post('/sign-up', async (req,res,next) => {
 });
 
 /** @GET **/
+
 /** BUSCAR TODOS OS CLIENTES **/
 router.get('/', async (req,res,next) => {
     const result = await dbConn.execute(`SELECT * FROM clientes;`);
