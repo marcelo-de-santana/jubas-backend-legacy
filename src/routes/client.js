@@ -1,66 +1,33 @@
-//DEPENDENCIAS
-    const express = require("express");
-    const router = express.Router();
-    const dbConn = require('../services/mysql');
+const express = require("express");
+const router = express.Router();
+const dbConn = require('../services/mysql');
 
-    module.exports = router;
+module.exports = router;
 
-/**
- * ROTAS DO CLIENTE
- * @GET
- */
+/** @POST **/
+/** REALIZAR LOGIN CLIENTE **/
+router.post('/check-in', async (req,res,next) => {
+    let sql = `SELECT * FROM clientes WHERE email = ? AND senha = ?`;
+    let params = [
+        req.body.email,
+        req.body.password
+    ]
+    const result = await dbConn.execute(sql,params);
+    if (result < 1) {
+        return res.status(401).send({"message": "Usuário ou Senha Incorretos"})
+    } else {
+        return res.status(200).send({"message" : "Usuário Logado"})
+    }
+});
 
-/**Regra de negócio 1.2*/
-//VERIFICAR EXISTÊNCIA DO CLIENTE
-    router.get('/:cpf', (req,res)=>{
-        let sql = `SELECT COUNT(*) as quantidade FROM cliente WHERE cpf = ?`;
-        let cpf = req.params.cpf
-
-        dbConn.query(sql,cpf, (err,fields)=>{
-            res.send(fields);
-        })
-    });
-
-    /**Regra de negócio 1.1 =>1.1.1 */
-//LOGIN DO CLIENTE
-    router.get('/check-in', (req,res)=>{
-        let sql = `SELECT COUNT(*) AS exists FROM cliente WHERE email = "${req.body.email}" AND senha = "${req.body.password}"`;
-
-        dbConn.query(sql, (err,results) => {
-            if(err) throw err;
-            res.send(results)
-        })
-    });
-
-//BUSCAR CADASTRO CLIENTE
-    router.get('/cadastro/:id', (req,res)=>{
-        let sql = `SELECT * FROM cliente WHERE id = ?`;
-        let id = req.params.id
-
-        dbConn.query(sql,id, (err,fields)=>{
-            res.send(fields)
-        })
-    });
-
-//BUSCAR TODOS OS CLIENTES
-    router.get('/', (req,res)=>{
-        let sql = `SELECT * FROM cliente`
-
-        dbConn.query(sql, (err,fields)=>{
-            if(err) throw err;
-            res.send(fields)
-        })
-    });
-
-
-/**
- * @POST
- */
-
-//CADASTRO DO CLIENTE
-    router.post('/sign-up', (req,res)=>{
-        let sql = `INSERT INTO cliente SET ?`;
-        let postVars ={
+/** CADASTRAR CLIENTE **/
+router.post('/sign-up', async (req,res,next) => {
+    let result = await dbConn.execute(`SELECT * FROM clientes WHERE cpf = '${req.body.cpf}'`);
+    if (result.length > 0) {
+         res.status(400).send({"message" : 'CPF já cadastrado'})
+    } else {
+        let sql = `INSERT INTO clientes SET ?`;
+        let postVars = {
             cpf: req.body.cpf,
             nome: req.body.name,
             email: req.body.email,
@@ -69,43 +36,25 @@
             senha: req.body.password,
             data_de_cadastro: new Date(Date.now())
         }
+        let restul = await dbConn.execute(sql, postVars);
+        res.status(201).send({"message" : 'Cadastrado Realizado com Sucesso!'});
+    }
+});
 
-        dbConn.query(sql, postVars, (error, fields)=>{
-            if(error){console.log(error)}
-        })
-    });
-
+/** @GET **/
+/** BUSCAR TODOS OS CLIENTES **/
+router.get('/', async (req,res,next) => {
+    const result = await dbConn.execute(`SELECT * FROM clientes;`);
+    res.send(result);
+});
 
 /**
  * @PUT
  */
 //ALTERAR CADASTRO CLIENTE
-    router.put('/cadastro/:id', (req,res,next)=>{
-        let sql = `UPDATE cliente SET ? WHERE id = ?`
-        let id = req.params.id
-        let postVars = {
-            email:              req.body.email,
-            nome:               req.body.nome,
-            telefone:           req.body.telefone,
-            senha:              req.body.senha,
-            data_de_nascimento: req.body.nascimento
-        }
-
-        dbConn.query(sql,postVars,id, (err,fields)=>{
-            next();
-        })
-    });
 
 
 /**
  * @DELETE
  */
 //DELETAR CADASTRO CLIENTE
-    router.delete('cadastro/:id', (req,res,next)=>{
-        let sql = `DELETE FROM cliente WHERE id = ?`;
-        let id = req.params.id;
-
-        dbConn.query(sql,id, (err,fields)=>{
-            next();
-        })
-    });

@@ -16,8 +16,8 @@ Estruturar a conferência de dados do cliente, separar a busca da etapa de acess
 Alterar forma de resposta, servidor deve direcionar o usuário para outra rota, atributo
 next() do expressjs.
 
-#1.2 - routes/client => PARCIALMENTE CONCLUÍDA, ATUALIZAR O FRONT-END
-Verificar a existência do usuário antes de realizar o cadastro
+#1.2 - routes/client => PARCIALMENTE CONCLUÍDA,
+implementar criptografia e aplicar máscara de login para realizar o acesso do usuário
 
 1.3 - routes/client => REALIZADO
 criar query de busca de dados e de alteração de dados

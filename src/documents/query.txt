@@ -1,1 +1,0 @@
-INSERT INTO cliente VALUES (3,"111.000.000-00","josea@teste.com","Jose Antonio", "(61) 99322-0000", "12345678", "2000-03-03", "2022-12-15");

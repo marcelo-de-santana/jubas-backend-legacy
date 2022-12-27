@@ -18,11 +18,7 @@
 
 /**Regra de negócio 2.1 */
 //BUSCA HORÁRIOS DE BARBEIROS
-    router.get('/service-hours', (req,res)=>{
-        let sql = `SELECT e.id_barbeiro, e.horario, b.nome FROM expediente AS e INNER JOIN barbeiro AS b ON e.id_barbeiro = b.id;`;
-        
-        dbConn.query(sql, (err,results)=>{
-            if(err) throw err;
-            res.json(results)
-        })
-    });
+router.get('/service-hours', async(req,res) => {
+    let sql = `SELECT e.id_barbeiro, e.horario, b.nome FROM expediente AS e INNER JOIN barbeiro AS b ON e.id_barbeiro = b.id;`;
+    dbConn.execute(sql)
+});
