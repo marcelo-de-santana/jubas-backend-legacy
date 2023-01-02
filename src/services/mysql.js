@@ -7,18 +7,18 @@ const pool = mysql.createPool({
     user            : process.env.MYSQL_USER,
     port            : process.env.MYSQL_PORT,
     connectionLimit : process.env.MYSQL_POOL
-});
+})
 
 exports.execute = (query, params=[]) => {
     return new Promise((resolve, reject) => {
         pool.query(query,params, (err, result, fields) => {
             if (err){
-                reject(err);
+                reject(err)
             } else {
-                resolve(result);
+                resolve(result)
             }
         })
     })
-};
+}
 
 exports.pool = pool;
