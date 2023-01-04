@@ -20,8 +20,8 @@ router.get('/', async (req, res, next) => {
 
         //FILTRAGEM DE HORÁRIOS DISPONÍVEIS
         const arrFilter = businessHours.filter(item => {
-            if (item.horarios >= values.horario_inicio && item.horarios <= values.horario_fim) {
-                return item.horarios < values.intervalo_inicio || item.horarios >= values.intervalo_fim || item.horarios == values.horarios_marcados
+            if (item.horarios >= values.horario_inicio && item.horarios < values.horario_fim) {
+                return item.horarios
             }
         })
         return arrFilter.map(item => { return item.horarios })
