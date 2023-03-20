@@ -8,8 +8,8 @@ module.exports = router;
 
 /** REALIZAR LOGIN CLIENTE **/
 router.post('/check-in', async (req,res,next) => {
-    const sql = `SELECT * FROM clientes WHERE email = ? AND senha = ?`
-    const params = [req.body.email,req.body.password]
+    const sql = `SELECT * FROM clientes WHERE cpf = ? AND senha = ?`
+    const params = [req.body.cpf,req.body.password]
 
     const result = await dbConn.execute(sql,params)
 
