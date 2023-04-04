@@ -9,7 +9,7 @@ module.exports = router;
 /** BUSCAR TODOS OS BARBEIROS **/
 router.get('/', async (req, res, next) => {
 
-    const sql = ``
+    const sql = `SELECT * FROM barbeiros`
 
     const result = await dbConn.execute(sql)
 

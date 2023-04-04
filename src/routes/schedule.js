@@ -26,12 +26,12 @@ router.get('/', async (req, res, next) => {
         //SEPARAÇÃO DE HORÁRIOS
         const availableTimes = []
         const unavailableTimes = []
-            for(time = startTime; time <= endTime; time += breakPoint){
-                if(time >= startInterval && time < endInterval){
-                    unavailableTimes.push(time)
-                }
-                availableTimes.push(time)
+        for (time = startTime; time <= endTime; time += breakPoint) {
+            if (time >= startInterval && time < endInterval) {
+                unavailableTimes.push(time)
             }
+            availableTimes.push(time)
+        }
 
         return {
             id: values.id,
@@ -43,4 +43,31 @@ router.get('/', async (req, res, next) => {
         }
     })
     res.status(200).send(allResults)
+})
+
+/** BUSCAR SERVIÇOS QUE O BARBEIRO REALIZA **/
+router.get('/specialties', async (req, res) => {
+    const sql = `
+        SELECT b.id, b.nome, b.status,
+        s.id_servico, s.nome_servico, s.preco, s.duracao,
+        c.id_categoria, c.nome_categoria
+        FROM barbeiros AS b
+        INNER JOIN especialidades AS e ON e.id_barbeiro = b.id
+        INNER JOIN servicos AS s ON s.id_servico = e.id_servico
+        INNER JOIN categorias AS c ON c.id_categoria = s.id_categoria 
+    `
+    const results = await dbConn.execute(sql)
+
+    res.send(results)
+})
+
+/** BUSCAR TODOS OS SERVIÇOS POR CATEGORIA **/
+router.get('/services-by-category', async (req, res) => {
+    const sql = `
+        SELECT * FROM 
+        categorias AS c
+        INNER JOIN servicos AS s ON s.id_categoria = c.id_categoria
+    `
+    const results = await dbConn.execute(sql)
+    res.send(results)
 })
