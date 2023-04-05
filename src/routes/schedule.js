@@ -36,7 +36,7 @@ router.get('/', async (req, res, next) => {
         return {
             id: values.id,
             name: values.nome,
-            dia: values.dia_semana,
+            day: values.dia_semana,
             available_times: availableTimes,
             unavailable_times: unavailableTimes,
             description: 'Horários em Timestamp'
@@ -58,16 +58,52 @@ router.get('/specialties', async (req, res) => {
     `
     const results = await dbConn.execute(sql)
 
-    res.send(results)
+    res.status(200).send(results)
 })
 
 /** BUSCAR TODOS OS SERVIÇOS POR CATEGORIA **/
 router.get('/services-by-category', async (req, res) => {
     const sql = `
-        SELECT * FROM 
-        categorias AS c
+        SELECT * FROM categorias AS c
         INNER JOIN servicos AS s ON s.id_categoria = c.id_categoria
+        ORDER BY c.id_categoria, s.id_servico
     `
     const results = await dbConn.execute(sql)
-    res.send(results)
+
+    let lastCategoryId
+    let services = []
+    let allResults = []
+
+    //SEPARAÇÃO DOS SERVIÇOS EM CATEGORIAS
+    results.forEach((value) => {
+        if (lastCategoryId != value.id_categoria && lastCategoryId != null) {
+            allResults.push({
+                category_id: lastCategoryId,
+                category_name: value.nome_categoria,
+                name_services: services,
+            })
+            services = []
+        }
+
+        //LISTAGEM DE SERVIÇOS
+        services.push({
+            service_id: value.id_servico,
+            service_name: value.nome_servico,
+            price: value.preco,
+            duration: value.duracao,
+        })
+
+        lastCategoryId = value.id_categoria
+    })
+
+    //VERIFICAÇÃO DE NÃO INCLUSÃO NA LISTA
+    if (services.length > 0) {
+        allResults.push({
+            category_id: lastCategoryId,
+            category_name: results[results.length - 1].nome_categoria,
+            name_services: services,
+        })
+    }
+
+    res.status(200).send(allResults)
 })
