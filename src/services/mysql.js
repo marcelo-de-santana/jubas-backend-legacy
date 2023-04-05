@@ -1,13 +1,24 @@
-const db = require('../config/environment.json').database
 const mysql = require('mysql');
 
-//CONECTANDO O BANCO DE DADOS
-const dbConn = mysql.createConnection({
-    host        : db.host,
-    database    : db.name,
-    password    : db.pass,
-    user        : db.user,
-    port        : db.port
-});
+const pool = mysql.createPool({
+    host            : process.env.MYSQL_HOST,
+    database        : process.env.MYSQL_NAME,
+    password        : process.env.MYSQL_PASS,
+    user            : process.env.MYSQL_USER,
+    port            : process.env.MYSQL_PORT,
+    connectionLimit : process.env.MYSQL_POOL
+})
 
-module.exports = dbConn;
+exports.execute = (query, params=[]) => {
+    return new Promise((resolve, reject) => {
+        pool.query(query,params, (err, result, fields) => {
+            if (err){
+                reject(err)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
+
+exports.pool = pool;

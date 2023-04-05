@@ -1,28 +1,17 @@
 //DEPENDENCIAS
-    const express = require("express");
-    const router = express.Router();
-    const dbConn = require('../services/mysql');
+const express = require("express");
+const router = express.Router();
+const dbConn = require('../services/mysql');
 
 //ROTAS DO BARBERIO
-    module.exports = router;
+module.exports = router;
 
-//BUSCA BARBEIROS
-    router.get('/',(req,res)=>{
-        let sql = `SELECT * FROM cliente;`;
-        
-        dbConn.query(sql, (err,results)=>{
-            if(err) throw err;
-            res.json(results)
-        })
-    });
+/** BUSCAR TODOS OS BARBEIROS **/
+router.get('/', async (req, res, next) => {
 
-/**Regra de negócio 2.1 */
-//BUSCA HORÁRIOS DE BARBEIROS
-    router.get('/service-hours', (req,res)=>{
-        let sql = `SELECT e.id_barbeiro, e.horario, b.nome FROM expediente AS e INNER JOIN barbeiro AS b ON e.id_barbeiro = b.id;`;
-        
-        dbConn.query(sql, (err,results)=>{
-            if(err) throw err;
-            res.json(results)
-        })
-    });
+    const sql = `SELECT * FROM barbeiros`
+
+    const result = await dbConn.execute(sql)
+
+    res.status(200).send(result)
+})
