@@ -71,6 +71,7 @@ router.get('/services-by-category', async (req, res) => {
     const results = await dbConn.execute(sql)
 
     let lastCategoryId
+    let lastCategoryName
     let services = []
     let allResults = []
 
@@ -79,7 +80,7 @@ router.get('/services-by-category', async (req, res) => {
         if (lastCategoryId != value.id_categoria && lastCategoryId != null) {
             allResults.push({
                 category_id: lastCategoryId,
-                category_name: value.nome_categoria,
+                category_name: lastCategoryName,
                 name_services: services,
             })
             services = []
@@ -94,6 +95,7 @@ router.get('/services-by-category', async (req, res) => {
         })
 
         lastCategoryId = value.id_categoria
+        lastCategoryName = value.nome_categoria
     })
 
     //VERIFICAÇÃO DE NÃO INCLUSÃO NA LISTA
