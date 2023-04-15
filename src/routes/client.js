@@ -39,11 +39,13 @@ router.post('/sign-up', async (req, res) => {
             data_de_cadastro: new Date(Date.now())
         }
         result = await dbConn.execute(sql, postVars)
-        if (result == 1) {
+        
+        if (result) {
             res.status(201).send({ "message": 'Cadastrado Realizado com Sucesso!' })
         } else {
             res.status(400).send({ "message": 'Ocorreu algum erro, entre em contato com o Administrador' })
         }
+        
     }
 })
 
