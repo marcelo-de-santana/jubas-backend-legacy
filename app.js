@@ -9,6 +9,7 @@
     const barber = require('./src/routes/barber')
     const client = require('./src/routes/client')
     const schedule = require('./src/routes/schedule')
+    const users = require('./src/routes/users')
 
 //CONFIGURAÇÕES
     app.listen(process.env.SERVER_PORT || 3000)
@@ -20,3 +21,4 @@
     app.use('/barber', barber)
     app.use('/client', client)
     app.use('/schedule', schedule)
+    app.use('/users', users)
