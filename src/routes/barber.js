@@ -1,17 +1,16 @@
 //DEPENDENCIAS
 const express = require("express");
 const router = express.Router();
-const dbConn = require('../services/mysql');
+const { getBarbers, getBarberHours, setBarberHours, updateBarberHours } = require("../controllers/barber");
 
-//ROTAS DO BARBERIO
 module.exports = router;
 
-/** BUSCAR TODOS OS BARBEIROS **/
-router.get('/', async (req, res, next) => {
+router.get('/all', getBarbers)
 
-    const sql = `SELECT * FROM barbeiros`
+router.get('/service-hour', getBarberHours)
 
-    const result = await dbConn.execute(sql)
+router.post('/service-hour', setBarberHours)
 
-    res.status(200).send(result)
-})
+router.put('/service-hour', updateBarberHours)
+
+router.delete('/service-hour', getBarberHours)
