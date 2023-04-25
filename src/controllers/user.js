@@ -12,7 +12,7 @@ exports.signIn = async (req, res, next) => {
                 "credentials": results
             })
         } else {
-            return res.status(401).send({ "message": "Usuário ou Senha Incorretos" })
+            return res.status(401).send({ "message": "Usuário ou senha incorretos" })
         }
     } catch (error) {
         return res.status(500).send({
