@@ -105,3 +105,30 @@ exports.deleleBarberHour = async (req, res, next) => {
         })
     }
 }
+
+exports.getServices = async (req, res, next) => {
+    try {
+        const sql = `
+        SELECT
+            c.id_categoria, c.nome_categoria, s.id_servico, s.nome_servico, s.preco, s.duracao, d.nome
+        FROM
+            categorias AS c
+        INNER JOIN 
+            servicos AS s
+        ON c.id_categoria = s.id_categoria
+        INNER JOIN 
+            disponibilidade AS d
+        ON s.id_status_servico = d.id_disponibilidade
+        `
+        const results = await dbConn.execute(sql)
+
+        //SEPARAR REGISTROS POR CATEGORIAS
+
+        return res.status(200).send(results)
+    } catch (error) {
+        return res.status(500).send({
+            "message": "Ocorreu algum erro, entre em contato com o administrador",
+            "errorMessage": error
+        })
+    }
+}

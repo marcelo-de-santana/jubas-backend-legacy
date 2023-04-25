@@ -1,13 +1,14 @@
 //DEPENDENCIAS
 const express = require("express");
 const router = express.Router();
-const { getBarbers, getBarberHour, setBarberHour, updateBarberHour, deleleBarberHour } = require("../controllers/barber");
+const { getBarbers, getBarberHour, setBarberHour, updateBarberHour, deleleBarberHour, getServices } = require("../controllers/barber");
 
 module.exports = router;
 
 /** @GET **/
 router.get('/all', getBarbers)
 router.get('/service-hour', getBarberHour)
+router.get('/service-by-catogory', getServices)
 
 /** @POST **/
 router.post('/service-hour', setBarberHour)
