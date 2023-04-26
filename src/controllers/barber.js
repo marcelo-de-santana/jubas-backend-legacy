@@ -110,7 +110,7 @@ exports.getServices = async (req, res, next) => {
     try {
         const sql = `
         SELECT
-            c.id_categoria, c.nome_categoria, s.id_servico, s.nome_servico, s.preco, s.duracao, d.nome
+            c.id_categoria, c.nome_categoria, s.id_servico, s.nome_servico, s.preco, s.duracao, d.id_disponibilidade, d.nome
         FROM
             categorias AS c
         INNER JOIN 
@@ -125,6 +125,68 @@ exports.getServices = async (req, res, next) => {
         //SEPARAR REGISTROS POR CATEGORIAS
 
         return res.status(200).send(results)
+    } catch (error) {
+        return res.status(500).send({
+            "message": "Ocorreu algum erro, entre em contato com o administrador",
+            "errorMessage": error
+        })
+    }
+}
+
+exports.setService = async (req, res, next) => {
+    try {
+        const sql = `INSERT INTO servicos SET ?`
+        const params = {
+            id_categoria: req.body.category_id,
+            id_status_servico: req.body.status_service_id,
+            nome_servico: req.body.name_service,
+            preco: req.body.price,
+            duracao: req.body.duration
+        }
+        await dbConn.execute(sql, params)
+
+        return res.send(201).send({
+            "message": "Registro gravado com sucesso"
+        })
+
+    } catch (error) {
+        return res.status(500).send({
+            "message": "Ocorreu algum erro, entre em contato com o administrador",
+            "errorMessage": error
+        })
+    }
+}
+
+exports.updateService = async (req, res, next) => {
+    try {
+        const sql = `UPDATE servicos SET ?`
+        const params = {
+            id_categoria: req.body.category_id,
+            id_status_servico: req.body.status_service_id,
+            nome_servico: req.body.name_service,
+            preco: req.body.price,
+            duracao: req.body.duration
+        }
+        await dbConn.execute(sql, params)
+
+        return res.send(201).send({
+            "message": "Registro gravado com sucesso"
+        })
+
+    } catch (error) {
+        return res.status(500).send({
+            "message": "Ocorreu algum erro, entre em contato com o administrador",
+            "errorMessage": error
+        })
+    }
+}
+
+exports.deleteService = async (req, res, next) => {
+    try {
+        const sql = `DELETE FROM servicos WHERE id_servico = "${req.body.service_id}"`
+        await dbConn.execute(sql)
+
+        return res.status(200).send({ "message": "Registro deletado com sucesso" })
     } catch (error) {
         return res.status(500).send({
             "message": "Ocorreu algum erro, entre em contato com o administrador",
