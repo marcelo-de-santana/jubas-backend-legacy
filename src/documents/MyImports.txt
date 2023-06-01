@@ -1,8 +1,0 @@
-{
-    "barber_id": 9,
-    "weekday": "Tuesday",
-    "start_time": "11:00:00",
-    "end_time": "20:30:00",
-    "start_interval": "16:00:00",
-    "end_interval": "17:00:00"
-}
