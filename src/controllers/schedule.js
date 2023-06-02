@@ -174,7 +174,7 @@ exports.getSpecialties = async (req, res, next) => {
             u.status_cadastro
         FROM
             categorias AS c
-        INNER JOIN
+        LEFT JOIN
             servicos AS s
         ON
             c.id_categoria = s.id_categoria
@@ -247,12 +247,65 @@ exports.getSpecialties = async (req, res, next) => {
         })
     }
 }
-
 exports.setCategory = async (req, res, next) => {
-	const sql = `INSERT INTO categorias SET nome_categoria = "${req.body.category_name}"`
-	await dbConn.execute(sql)
-	
-	return res.status(200).send({
-		message: "Registro gravado com sucesso"
-	})
+    try {
+        const sql = `
+        INSERT INTO
+            categorias
+        SET
+            nome_categoria = "${req.body.category_name}"
+        `
+        await dbConn.execute(sql)
+
+        return res.status(200).send({
+            message: "Registro gravado com sucesso"
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: "Ocorreu algum erro, entre em contato com o administrador",
+            errorMessage: error
+        })
+    }
+}
+
+exports.updateCategory = async (req, res, next) => {
+    try {
+        const sql = `
+    UPDATE 
+        categorias
+    SET
+        nome_categoria = ?
+    WHERE
+        id_categoria = ? `
+        await dbConn.execute(sql, [req.body.category_name, req.body.category_id])
+
+        return res.status(200).send({
+            message: "Registro gravado com sucesso"
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: "Ocorreu algum erro, entre em contato com o administrador",
+            errorMessage: error
+        })
+    }
+}
+
+exports.deleteCategory = async (req, res, next) => {
+    try {
+        const sql = `
+    DELETE FROM
+        categorias
+    WHERE
+        id_categoria = ? `
+        await dbConn.execute(sql, [req.body.category_id])
+
+        return res.status(200).send({
+            message: "Registro gravado com sucesso"
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: "Ocorreu algum erro, entre em contato com o administrador",
+            errorMessage: error
+        })
+    }
 }
