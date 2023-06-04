@@ -4,47 +4,84 @@ exports.getSchedule = async (req, res, next) => {
     try {
         const sql = `
             SELECT
-                h.id_barbeiro, u.nome, h.dia_da_semana, h.horario_inicio, h.horario_fim, h.intervalo_inicio, h.intervalo_fim
+                s.id, s.dia, h.id_barbeiro, u.nome, h.horario_inicio, h.horario_fim, h.intervalo_inicio, h.intervalo_fim
             FROM
+                semana AS s
+            INNER JOIN
                 horarios_barbeiro AS h
+            ON
+                h.dia_da_semana = s.id
             INNER JOIN
                 usuarios AS u
             ON
                 h.id_barbeiro = u.id_usuario
-            WHERE h.dia_da_semana = 3
+            ORDER BY
+                s.id, u.nome 
             `
         const results = await dbConn.execute(sql)
 
-        const allResults = results.map(values => {
+        let day
+        const allResults = []
+
+        results.map(values => {
+            const {
+                id,
+                dia,
+                id_barbeiro,
+                nome,
+                horario_inicio,
+                horario_fim,
+                intervalo_inicio,
+                intervalo_fim
+            } = values
+
             //CONVETENDO HORÁRIOS EM MILISEGUNDOS
-            const startTime = new Date(`1970-01-01T${values.horario_inicio}Z`).getTime()
-            const endTime = new Date(`1970-01-01T${values.horario_fim}Z`).getTime() - (1000 * 60 * 30)
-            const startInterval = new Date(`1970-01-01T${values.intervalo_inicio}Z`).getTime()
-            const endInterval = new Date(`1970-01-01T${values.intervalo_fim}Z`).getTime()
-            //30 MINUTOS CONVETIDO EM MILISEGUNDOS
-            const breakPoint = 1000 * 60 * 30
-            //SEPARAÇÃO DE HORÁRIOS
-            const availableTimes = []
-            const unavailableTimes = []
-            for (time = startTime; time <= endTime; time += breakPoint) {
-                if (time >= startInterval && time < endInterval) {
-                    unavailableTimes.push(time)
-                }
-                availableTimes.push(time)
+            const horarios = {
+                inicio: Date.parse(`1970-01-01T${horario_inicio}`),
+                fim: Date.parse(`1970-01-01T${horario_fim}`) - (1000 * 60 * 30),
+                intervaloInicio: Date.parse(`1970-01-01T${intervalo_inicio}`),
+                intervaloFim: Date.parse(`1970-01-01T${intervalo_fim}`)
             }
 
-            return {
-                barber_id: values.id_barbeiro,
-                barber_name: values.nome,
-                daily: values.dia_da_semana,
-                available_times: availableTimes,
-                unavailable_times: unavailableTimes,
-                description: 'Horários em Timestamp'
+            //INTERVALOS DE 30 MINUTOS EM MILISEGUNDOS
+            const breakPoint = 1000 * 60 * 30
+
+            const availableTimes = []
+            const unavailableTimes = []
+
+            //SEPARAÇÃO DE HORÁRIOS
+            for (let time = horarios.inicio; time <= horarios.fim; time += breakPoint) {
+                if (time >= horarios.intervaloInicio && time < horarios.intervaloFim) {
+                    unavailableTimes.push(new Date(time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
+                }
+                availableTimes.push(new Date(time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
             }
+
+            if (day == null || day != id) {
+                allResults.push({
+                    day_id: id,
+                    day_name: dia,
+                    daily_schedule: [{
+                        barber_id: id_barbeiro,
+                        barber_name: nome,
+                        available_times: availableTimes,
+                        unavailable_times: unavailableTimes,
+                    }]
+                })
+            } else {
+                allResults[allResults.length - 1].daily_schedule.push({
+                    barber_id: id_barbeiro,
+                    barber_name: nome,
+                    available_times: availableTimes,
+                    unavailable_times: unavailableTimes
+                })
+            }
+            day = id
         })
 
         return res.status(200).send(allResults)
-    } catch (error) {
+    }
+    catch (error) {
         return res.status(500).send({
             message: "Ocorreu algum erro, entre em contato com o administrador",
             errorMessage: error
