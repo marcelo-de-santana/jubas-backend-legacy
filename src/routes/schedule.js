@@ -8,9 +8,12 @@ const {
     getWeekday,
     getAvailableTimes,
     getSpecialties,
+    setService,
+    updateService,
     setCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    deleteService
 } = require("../controllers/schedule");
 
 module.exports = router;
@@ -24,9 +27,12 @@ router.get('/specialties', getSpecialties)
 /** @POST **/
 router.post('/available-times', getAvailableTimes)
 router.post('/category', setCategory)
+router.post('/service', setService)
 
 /** @PUT **/
 router.put('/category', updateCategory)
+router.put('/service', updateService)
 
 /** @DELETE **/
 router.delete('/category', deleteCategory)
+router.delete('/service', deleteService)

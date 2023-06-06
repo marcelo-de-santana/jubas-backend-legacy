@@ -284,13 +284,76 @@ exports.getSpecialties = async (req, res, next) => {
         })
     }
 }
+
+exports.setService = async (req, res, next) => {
+    try {
+        const sql = ` INSERT INTO servicos SET ? `
+        const params = {
+            id_categoria: req.body.category_id,
+            nome_servico: req.body.service_name,
+            duracao: req.body.duration,
+            preco: req.body.price,
+            id_status_servico: 1
+        }
+
+        await dbConn.execute(sql, params)
+
+        return res.status(200).send({
+            message: "Registro gravado com sucesso"
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: "Ocorreu algum erro, entre em contato com o administrador",
+            errorMessage: error
+        })
+    }
+}
+
+exports.updateService = async (req, res, next) => {
+    try {
+        const sql = ` UPDATE servicos SET ? WHERE id_servico = ? `
+        const params = {
+            nome_servico: req.body.service_name,
+            duracao: req.body.duration,
+            preco: req.body.price,
+        }
+        
+        await dbConn.execute(sql, [params, req.body.service_id])
+        
+        return res.status(200).send({
+            message: "Registro gravado com sucesso"
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: "Ocorreu algum erro, entre em contato com o administrador",
+            errorMessage: error
+        })
+    }
+}
+
+exports.deleteService = async (req, res, next) => {
+    try {
+        const sql = ` DELETE FROM servicos WHERE id_servico = "${req.body.service_id}" `
+        await dbConn.execute(sql)
+
+        return res.status(200).send({
+            message: "Registro excluído com sucesso"
+        })
+    } catch (error) {
+        return res.status(500).send({
+            message: "Ocorreu algum erro, entre em contato com o administrador",
+            errorMessage: error
+        })
+    }
+}
+
 exports.setCategory = async (req, res, next) => {
     try {
         const sql = `
         INSERT INTO
-            categorias
+        categorias
         SET
-            nome_categoria = "${req.body.category_name}"
+        nome_categoria = "${req.body.category_name}"
         `
         await dbConn.execute(sql)
 
@@ -304,6 +367,7 @@ exports.setCategory = async (req, res, next) => {
         })
     }
 }
+
 
 exports.updateCategory = async (req, res, next) => {
     try {
@@ -337,7 +401,7 @@ exports.deleteCategory = async (req, res, next) => {
         await dbConn.execute(sql, [req.body.category_id])
 
         return res.status(200).send({
-            message: "Registro gravado com sucesso"
+            message: "Registro excluído com sucesso"
         })
     } catch (error) {
         return res.status(500).send({
