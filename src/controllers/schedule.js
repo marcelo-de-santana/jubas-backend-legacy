@@ -1,5 +1,6 @@
 const dbConn = require('../services/mysql');
 
+//RETORNA OS DIAS DA SEMANA, BARBEIROS E HORÁRIOS DISPONÍVEIS
 exports.getSchedule = async (req, res, next) => {
     try {
         const sql = `
@@ -89,6 +90,7 @@ exports.getSchedule = async (req, res, next) => {
     }
 }
 
+//MÉTODO RESPONSÁVEL POR RETORNAR OS SERVIÇOS DE ACORDO COM A CATEGORIA
 exports.getScheduleServices = async (req, res) => {
     const sql = `
         SELECT * FROM categorias AS c
@@ -137,6 +139,7 @@ exports.getScheduleServices = async (req, res) => {
     res.status(200).send(allResults)
 }
 
+//MÉTODO RESPONSÁVEL POR RETORNAR OS SERVIÇOS DISPONÍVEIS DE ACORDO COM O HORÁRIO
 exports.getAvailableTimes = async (req, res, next) => {
     try {
         const sql = `

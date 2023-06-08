@@ -330,9 +330,10 @@ exports.getBarberSpecialties = async (req, res, next) => {
         SELECT
             c.id_categoria,
             c.nome_categoria,
-            eb.id_especialidade,
             s.id_servico,
-            s.nome_servico
+            s.nome_servico,
+            s.preco,
+            s.duracao
         FROM
             categorias AS c
         INNER JOIN
@@ -348,7 +349,7 @@ exports.getBarberSpecialties = async (req, res, next) => {
         ON
             u.id_usuario = eb.id_barbeiro
         WHERE
-            u.id_usuario = ${req.params.id} AND u.nivel_acesso = 2 AND s.id_status_servico = 1
+            u.id_usuario = ${req.params.id} AND s.id_status_servico = 1
         ORDER BY
             c.id_categoria, s.id_servico
         `
@@ -371,7 +372,9 @@ exports.getBarberSpecialties = async (req, res, next) => {
             currentCategory.services.push({
                 specialty_id: value.id_especialidade,
                 service_id: value.id_servico,
-                service_name: value.nome_servico
+                service_name: value.nome_servico,
+                price: value.preco,
+                duration: value.duracao
             });
 
             lastCategoryId = value.id_categoria
