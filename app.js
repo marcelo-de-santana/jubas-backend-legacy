@@ -7,9 +7,8 @@
 
 //iMPORTAÇÃO DE ROTAS
     const barber = require('./src/routes/barber')
-    const client = require('./src/routes/client')
     const schedule = require('./src/routes/schedule')
-    const users = require('./src/routes/users')
+    const user = require('./src/routes/user')
 
 //CONFIGURAÇÕES
     app.listen(process.env.SERVER_PORT || 3000)
@@ -19,6 +18,5 @@
 
 //ROTAS
     app.use('/barber', barber)
-    app.use('/client', client)
     app.use('/schedule', schedule)
-    app.use('/users', users)
+    app.use('/user', user)
