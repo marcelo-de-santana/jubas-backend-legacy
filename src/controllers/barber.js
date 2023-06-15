@@ -1,29 +1,5 @@
 const dbConn = require("../services/mysql");
 
-//MÉTODO RESPONSÁVEL POR RETORNAR TODOS OS USUÁRIOS COM PERMISSÃO DE NÍVEL 2 (BARBEIRO)
-exports.getBarbers = async (req, res) => {
-  try {
-    const sql = `
-        SELECT 
-            id_usuario AS barber_id,
-            nome AS barber_name,
-            status_cadastro AS status
-        FROM
-            usuarios
-        WHERE
-            nivel_acesso = 2
-        `;
-    const result = await dbConn.execute(sql);
-
-    return res.status(200).send(result);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
 //METÓDO RESPONSÁVEL POR RETORNAR TODOS OS HORÁRIOS EM QUE OS BARBEIROS ESTÃO DISPONÍVEIS
 exports.getBarberHour = async (req, res) => {
   try {
@@ -99,238 +75,6 @@ exports.getBarberHour = async (req, res) => {
   }
 };
 
-//MÉTODO RESPONSÁVEL POR INSERIR UM HORÁRIO EM QUE O BARBEIRO ESTARÁ DISPONÍVEL
-exports.setBarberHour = async (req, res) => {
-  try {
-    const { barber_id, statusButton } = req.body;
-    const { start_time, end_time, start_interval, end_interval, status } =
-      req.body.data;
-    const sql = `INSERT INTO horarios_barbeiro SET ?`;
-    let params = {
-      id_barbeiro: barber_id,
-      dia_da_semana: Object.keys(statusButton)[0],
-      horario_inicio: start_time,
-      horario_fim: end_time,
-      intervalo_inicio: start_interval,
-      intervalo_fim: end_interval,
-      status: status,
-    };
-    await dbConn.execute(sql, params);
-
-    return res.status(201).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.updateBarberHour = async (req, res) => {
-  try {
-    const {
-      time_id,
-      start_time,
-      end_time,
-      start_interval,
-      end_interval,
-      status,
-    } = req.body.data;
-    let sql = `UPDATE horarios_barbeiro  SET ? WHERE id_horario = "${time_id}"`;
-    let params = {
-      horario_inicio: start_time,
-      horario_fim: end_time,
-      intervalo_inicio: start_interval,
-      intervalo_fim: end_interval,
-      status: status,
-    };
-    await dbConn.execute(sql, params);
-
-    return res.status(200).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-//MÉTODO RESPONSÁVEL POR EXCLUIR UM HORÁRIO EM QUE O BARBEIRO ESTÁ DISPONÍVEL
-exports.deleleBarberHour = async (req, res) => {
-  try {
-    const sql = `DELETE FROM horarios_barbeiro WHERE id_horario = "${req.body.data.time_id}"`;
-    await dbConn.execute(sql);
-
-    return res.status(200).send({ message: "Registro deletado com sucesso" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-//MÉTODO RESPONSÁVEL POR RETORNAR TODOS OS SERVIÇOS DE COM O BARBEIRO
-exports.getServices = async (req, res) => {
-  try {
-    const sql = `
-        SELECT
-            s.id_servico,
-            s.nome_servico,
-            d.id_disponibilidade,
-            d.nome AS status
-        FROM
-            categorias AS c
-        INNER JOIN 
-            servicos AS s
-        ON c.id_categoria = s.id_categoria
-        INNER JOIN 
-            disponibilidade AS d
-        ON s.id_status_servico = d.id_disponibilidade
-        `;
-    const results = await dbConn.execute(sql);
-
-    //SEPARAR REGISTROS POR CATEGORIAS
-
-    return res.status(200).send(results);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.setService = async (req, res) => {
-  try {
-    const sql = `INSERT INTO servicos SET ?`;
-    const params = {
-      id_categoria: req.body.category_id,
-      id_status_servico: req.body.status_service_id,
-      nome_servico: req.body.name_service,
-      preco: req.body.price,
-      duracao: req.body.duration,
-    };
-    await dbConn.execute(sql, params);
-
-    return res.send(201).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.updateService = async (req, res) => {
-  try {
-    const sql = `UPDATE servicos SET ? WHERE id_servico = "${req.body.service_id}"`;
-    const params = {
-      id_categoria: req.body.category_id,
-      id_status_servico: req.body.status_service_id,
-      nome_servico: req.body.name_service,
-      preco: req.body.price,
-      duracao: req.body.duration,
-    };
-    await dbConn.execute(sql, params);
-
-    return res.send(200).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.deleteService = async (req, res) => {
-  try {
-    const sql = `DELETE FROM servicos WHERE id_servico = "${req.body.service_id}"`;
-    await dbConn.execute(sql);
-
-    return res.status(200).send({ message: "Registro deletado com sucesso" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.getCatogories = async (req, res) => {
-  try {
-    const sql = `SELECT id_categoria, nome_categoria FROM categorias`;
-    const results = await dbConn.execute(sql);
-
-    return res.status(200).send(results);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.setCategory = async (req, res) => {
-  try {
-    const sql = `INSERT INTO categorias SET ?`;
-    const params = {
-      nome_categoria: req.body.category_name,
-    };
-    await dbConn.execute(sql, params);
-
-    return res.send(201).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.updateCategory = async (req, res) => {
-  try {
-    const sql = `UPDATE categorias SET ? WHERE id_categoria = "${req.body.category_id}"`;
-    const params = {
-      nome_categoria: req.body.category_name,
-    };
-    await dbConn.execute(sql, params);
-
-    return res.send(200).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.deleteCategory = async (req, res) => {
-  try {
-    const sql = `DELETE FROM categorias WHERE id_categoria = "${req.body.category_id}"`;
-    await dbConn.execute(sql);
-
-    return res.status(200).send({ message: "Registro deletado com sucesso" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
 //MÉTODO RESPONSÁVEL POR BUSCAR AS ESPECIALIDADES DE ACORDO COM O ID DO BARBEIRO
 exports.getBarberSpecialties = async (req, res) => {
   try {
@@ -398,38 +142,28 @@ exports.getBarberSpecialties = async (req, res) => {
   }
 };
 
-exports.setBarberSpecialty = async (req, res) => {
+//MÉTODO RESPONSÁVEL POR INSERIR UM HORÁRIO EM QUE O BARBEIRO ESTARÁ DISPONÍVEL
+exports.setBarberHour = async (req, res) => {
   try {
-    const sql = `
-        INSERT INTO
-            especialidades_barbeiro (id_barbeiro, id_servico)
-        VALUES
-            (${req.body.barber_id}, ${req.body.service_id})
-        `;
-    await dbConn.execute(sql);
+    const { barber_id, statusButton } = req.body;
+    const { start_time, end_time, start_interval, end_interval, status } =
+      req.body.data;
+    const sql = `INSERT INTO horarios_barbeiro SET ?`;
+    let params = {
+      id_barbeiro: barber_id,
+      dia_da_semana: Object.keys(statusButton)[0],
+      horario_inicio: start_time,
+      horario_fim: end_time,
+      intervalo_inicio: start_interval,
+      intervalo_fim: end_interval,
+      status: status,
+    };
+    await dbConn.execute(sql, params);
+
     return res.status(201).send({
       message: "Registro gravado com sucesso",
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.deleteBarberSpecialty = async (req, res) => {
-  try {
-    const sql = `DELETE FROM especialidades_barbeiro WHERE id_barbeiro = ${req.body.barber_id} AND id_servico = ${req.body.service_id}`;
-
-    await dbConn.execute(sql);
-
-    return res.status(200).send({
-      message: "Registro deletado com sucesso",
-    });
-  } catch (error) {
-    console.error(error);
     return res.status(500).send({
       message: "Ocorreu algum erro, entre em contato com o administrador",
       errorMessage: error,
@@ -468,6 +202,27 @@ exports.setRegisterBarber = async (req, res) => {
   }
 };
 
+exports.setBarberSpecialty = async (req, res) => {
+  try {
+    const sql = `
+        INSERT INTO
+            especialidades_barbeiro (id_barbeiro, id_servico)
+        VALUES
+            (${req.body.barber_id}, ${req.body.service_id})
+        `;
+    await dbConn.execute(sql);
+    return res.status(201).send({
+      message: "Registro gravado com sucesso",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
 //MÉTODO RESPONSÁVEL POR ATUALIZAR O NOME DO BARBEIRO
 exports.updateBarberName = async (req, res) => {
   try {
@@ -493,6 +248,37 @@ exports.updateBarberName = async (req, res) => {
   }
 };
 
+exports.updateBarberHour = async (req, res) => {
+  try {
+    const {
+      time_id,
+      start_time,
+      end_time,
+      start_interval,
+      end_interval,
+      status,
+    } = req.body.data;
+    let sql = `UPDATE horarios_barbeiro  SET ? WHERE id_horario = "${time_id}"`;
+    let params = {
+      horario_inicio: start_time,
+      horario_fim: end_time,
+      intervalo_inicio: start_interval,
+      intervalo_fim: end_interval,
+      status: status,
+    };
+    await dbConn.execute(sql, params);
+
+    return res.status(200).send({
+      message: "Registro gravado com sucesso",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
 exports.deleteBarber = async (req, res) => {
   try {
     //ALTERA PERMISSÃO DE BARBEIRO PARA USUÁRIO
@@ -501,6 +287,39 @@ exports.deleteBarber = async (req, res) => {
 
     //REMOVE O USUÁRIO DA LISTA DE HORÁRIOS DE BARBEIROS
     sql = `DELETE FROM horarios_barbeiro WHERE id_barbeiro = "${req.body.barberId}"`;
+    await dbConn.execute(sql);
+
+    return res.status(200).send({
+      message: "Registro deletado com sucesso",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+//MÉTODO RESPONSÁVEL POR EXCLUIR UM HORÁRIO EM QUE O BARBEIRO ESTÁ DISPONÍVEL
+exports.deleleBarberHour = async (req, res) => {
+  try {
+    const sql = `DELETE FROM horarios_barbeiro WHERE id_horario = "${req.body.data.time_id}"`;
+    await dbConn.execute(sql);
+
+    return res.status(200).send({ message: "Registro deletado com sucesso" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+exports.deleteBarberSpecialty = async (req, res) => {
+  try {
+    const sql = `DELETE FROM especialidades_barbeiro WHERE id_barbeiro = ${req.body.barber_id} AND id_servico = ${req.body.service_id}`;
+
     await dbConn.execute(sql);
 
     return res.status(200).send({

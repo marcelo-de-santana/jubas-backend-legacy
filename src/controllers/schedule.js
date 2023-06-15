@@ -115,112 +115,6 @@ exports.getSchedule = async (req, res, next) => {
   }
 };
 
-//MÉTODO RESPONSÁVEL POR RETORNAR OS SERVIÇOS DE ACORDO COM A CATEGORIA
-exports.getScheduleServices = async (req, res) => {
-  const sql = `
-        SELECT * FROM categorias AS c
-        INNER JOIN servicos AS s ON s.id_categoria = c.id_categoria
-        ORDER BY c.id_categoria, s.id_servico
-    `;
-  const results = await dbConn.execute(sql);
-
-  let lastCategoryId;
-  let lastCategoryName;
-  let services = [];
-  let allResults = [];
-
-  //SEPARAÇÃO DOS SERVIÇOS EM CATEGORIAS
-  results.forEach((value) => {
-    if (lastCategoryId != value.id_categoria && lastCategoryId != null) {
-      allResults.push({
-        category_id: lastCategoryId,
-        category_name: lastCategoryName,
-        name_services: services,
-      });
-      services = [];
-    }
-
-    //LISTAGEM DE SERVIÇOS
-    services.push({
-      service_id: value.id_servico,
-      service_name: value.nome_servico,
-      price: value.preco,
-      duration: value.duracao,
-    });
-
-    lastCategoryId = value.id_categoria;
-    lastCategoryName = value.nome_categoria;
-  });
-
-  //VERIFICAÇÃO DE NÃO INCLUSÃO NA LISTA
-  if (services.length > 0) {
-    allResults.push({
-      category_id: lastCategoryId,
-      category_name: results[results.length - 1].nome_categoria,
-      name_services: services,
-    });
-  }
-
-  res.status(200).send(allResults);
-};
-
-//MÉTODO RESPONSÁVEL POR RETORNAR OS SERVIÇOS DISPONÍVEIS DE ACORDO COM O HORÁRIO
-exports.getAvailableTimes = async (req, res, next) => {
-  try {
-    const sql = `
-    SELECT
-        eb.id_barbeiro,
-        eb.id_servico,
-        s.nome_servico,
-        s.duracao
-    FROM
-        servicos AS s
-    LEFT JOIN
-        especialidades_barbeiro AS eb
-    ON
-        s.id_servico = eb.id_servico
-    WHERE s.id_servico IN (?) AND s.id_status_servico = 1
-`;
-    const params = req.body.servicesId;
-
-    const results = await dbConn.execute(sql, params);
-
-    res.status(200).send(results);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.getScheduleTimes = async (req, res, next) => {
-  try {
-    const sql = `SELECT * FROM agenda`;
-    const results = await dbConn.execute(sql);
-
-    return res.status(200).send(results);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.getWeekday = async (req, res, next) => {
-  try {
-    const sql = `SELECT id, dia AS day FROM semana`;
-    const results = await dbConn.execute(sql);
-    return res.status(200).send(results);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
 //MÉTODO RESPONSÁVEL POR BUSCAR AS ESPECIALIDADES QUE OS BARBEIROS ATENDEM
 exports.getSpecialties = async (req, res, next) => {
   try {
@@ -313,6 +207,19 @@ exports.getSpecialties = async (req, res, next) => {
   }
 };
 
+exports.getWeekday = async (req, res, next) => {
+  try {
+    const sql = `SELECT id, dia AS day FROM semana`;
+    const results = await dbConn.execute(sql);
+    return res.status(200).send(results);
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
 exports.setService = async (req, res, next) => {
   try {
     const sql = ` INSERT INTO servicos SET ? `;
@@ -325,6 +232,27 @@ exports.setService = async (req, res, next) => {
     };
 
     await dbConn.execute(sql, params);
+
+    return res.status(200).send({
+      message: "Registro gravado com sucesso",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+exports.setCategory = async (req, res, next) => {
+  try {
+    const sql = `
+        INSERT INTO
+        categorias
+        SET
+        nome_categoria = "${req.body.category_name}"
+        `;
+    await dbConn.execute(sql);
 
     return res.status(200).send({
       message: "Registro gravado com sucesso",
@@ -359,43 +287,6 @@ exports.updateService = async (req, res, next) => {
   }
 };
 
-exports.deleteService = async (req, res, next) => {
-  try {
-    const sql = ` DELETE FROM servicos WHERE id_servico = "${req.body.service_id}" `;
-    await dbConn.execute(sql);
-
-    return res.status(200).send({
-      message: "Registro excluído com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.setCategory = async (req, res, next) => {
-  try {
-    const sql = `
-        INSERT INTO
-        categorias
-        SET
-        nome_categoria = "${req.body.category_name}"
-        `;
-    await dbConn.execute(sql);
-
-    return res.status(200).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
 exports.updateCategory = async (req, res, next) => {
   try {
     const sql = `
@@ -409,6 +300,22 @@ exports.updateCategory = async (req, res, next) => {
 
     return res.status(200).send({
       message: "Registro gravado com sucesso",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+exports.deleteService = async (req, res, next) => {
+  try {
+    const sql = ` DELETE FROM servicos WHERE id_servico = "${req.body.service_id}" `;
+    await dbConn.execute(sql);
+
+    return res.status(200).send({
+      message: "Registro excluído com sucesso",
     });
   } catch (error) {
     return res.status(500).send({

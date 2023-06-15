@@ -4,16 +4,14 @@ const dbConn = require("../services/mysql");
 const bodyParser = require("body-parser");
 const {
   getSchedule,
-  getScheduleServices,
-  getWeekday,
-  getAvailableTimes,
   getSpecialties,
+  getWeekday,
   setService,
-  updateService,
   setCategory,
+  updateService,
   updateCategory,
-  deleteCategory,
   deleteService,
+  deleteCategory,
   setNewService,
 } = require("../controllers/schedule");
 
@@ -23,13 +21,11 @@ module.exports = router;
 router.get("/", getSchedule);
 router.get("/specialties", getSpecialties);
 router.get("/week", getWeekday);
-// router.get('/services', getScheduleServices)
 
 /** @POST **/
 router.post("/register-service", setNewService);
 router.post("/category", setCategory);
 router.post("/service", setService);
-// router.post('/available-times', getAvailableTimes)
 
 /** @PUT **/
 router.put("/category", updateCategory);

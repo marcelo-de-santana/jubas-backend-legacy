@@ -1,7 +1,22 @@
 const dbConn = require("../services/mysql");
 
+//MÉTODO RESPONSÁVEL POR RETORNAR TODOS OS USUÁRIOS
+exports.getAllUsers = async (req, res) => {
+  try {
+    const sql = `SELECT id_usuario, cpf, nome, nivel_acesso, status_cadastro FROM usuarios ORDER BY nome`;
+    const results = await dbConn.execute(sql);
+
+    res.status(200).send(results);
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
 //MÉTODO RESPONSÁVEL PELO LOGIN DO USUÁRIO
-exports.searchUserAndPassword = async (req, res, next) => {
+exports.searchUserAndPassword = async (req, res) => {
   try {
     const sql = `
         SELECT
@@ -28,7 +43,7 @@ exports.searchUserAndPassword = async (req, res, next) => {
 };
 
 //MÉTODO RESPONSÁVEL PELO CADASTRO DO USUÁRIO
-exports.registerUser = async (req, res, next) => {
+exports.registerUser = async (req, res) => {
   try {
     let sql = `SELECT COUNT(*) AS valor FROM usuarios WHERE cpf = ?`;
     let result = await dbConn.execute(sql, [req.body.cpf]);
@@ -70,7 +85,27 @@ exports.registerUser = async (req, res, next) => {
   }
 };
 
-exports.recoveryPass = async (req, res, next) => {
+//MÉTODO RESPONSÁVEL POR ALTERAR O STATUS DO CADASTRO DO USUÁRIO
+exports.updateRegistrationStatus = async (req, res, next) => {
+  try {
+    let sql = `UPDATE usuarios SET ? WHERE id_usuario = "${req.body.barber_id}"`;
+    let params = {
+      status_cadastro: req.body.status,
+    };
+    await dbConn.execute(sql, params);
+    return res.status(200).send({
+      message: "Registro gravado com sucesso",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+//MÉTODO RESPONSÁVEL PELA RECUPERAÇÃO DE SENHA
+exports.recoveryPass = async (req, res) => {
   try {
     const { cpf, password } = req.body;
     let sql = `SELECT COUNT(*) AS VALUE FROM usuarios WHERE cpf = ?`;
@@ -92,73 +127,7 @@ exports.recoveryPass = async (req, res, next) => {
   }
 };
 
-//MÉTODO RESPONSÁVEL POR ALTERAR O STATUS DO CADASTRO DO USUÁRIO
-exports.updateRegistrationStatus = async (req, res, next) => {
-  try {
-    let sql = `UPDATE usuarios SET ? WHERE id_usuario = "${req.body.barber_id}"`;
-    let params = {
-      status_cadastro: req.body.status,
-    };
-    await dbConn.execute(sql, params);
-    return res.status(200).send({
-      message: "Registro gravado com sucesso",
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-//MÉTODO RESPONSÁVEL POR RETORNAR TODOS OS USUÁRIOS
-exports.getAllUsers = async (req, res) => {
-  try {
-    const sql = `SELECT id_usuario, cpf, nome, nivel_acesso, status_cadastro FROM usuarios ORDER BY nome`;
-    const results = await dbConn.execute(sql);
-
-    res.status(200).send(results);
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-//MÉTODO RESPONSÁVEL POR RETORNAR O USUÁRIO PELO CPF
-exports.getUserByCPF = async (req, res, next) => {
-  const sql = `SELECT id_usuario, nome, email, telefone, data_de_nascimento, nivel_acesso FROM usuarios WHERE ?`;
-  const result = await dbConn.execute(sql, [req.params]);
-
-  const userData = result.map((value) => ({
-    user_id: value.id_usuario,
-    user_name: value.nome,
-    email: value.email,
-    phoneNumber: value.telefone,
-    birthday: value.data_de_nascimento,
-    status_level: value.nivel_acesso,
-  }));
-
-  return res.status(200).send(userData);
-};
-
-//MÉTODO RESPONSÁVEL POR EXCUIR UM USUÁRIO
-exports.deleteUser = async (req, res, next) => {
-  try {
-    const sql = `DELETE FROM usuarios WHERE id_usuario = "${req.body.user_id}"`;
-    await dbConn.execute(sql);
-
-    return res.status(200).send({ message: "Registro deletado com sucesso" });
-  } catch (error) {
-    return res.status(500).send({
-      message: "Ocorreu algum erro, entre em contato com o administrador",
-      errorMessage: error,
-    });
-  }
-};
-
-exports.updateUser = async (req, res, next) => {
+exports.updateUser = async (req, res) => {
   try {
     const sql = `UPDATE usuarios SET ? WHERE id_usuario = "${req.body.user_id}"`;
     const params = {
@@ -181,11 +150,17 @@ exports.updateUser = async (req, res, next) => {
   }
 };
 
-//INSERIR USUÁRIO
-exports.setUser = async (req, res, next) => {
-  console.log(req.body);
-  return res.status(200).send(req.body);
-};
+//MÉTODO RESPONSÁVEL POR EXCUIR UM USUÁRIO
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const sql = `DELETE FROM usuarios WHERE id_usuario = "${req.body.user_id}"`;
+    await dbConn.execute(sql);
 
-//ATUALIZAR USUÁRIO
-//MUDAR O NÍVEL DE ACESSO DO USUARIO
+    return res.status(200).send({ message: "Registro deletado com sucesso" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
