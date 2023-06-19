@@ -6,6 +6,7 @@ const {
   getSchedule,
   getSpecialties,
   getWeekday,
+  getScheduleTimes,
   setService,
   setCategory,
   updateService,
@@ -13,6 +14,7 @@ const {
   deleteService,
   deleteCategory,
   setNewService,
+  deleteScheduleTime,
 } = require("../controllers/schedule");
 
 module.exports = router;
@@ -21,6 +23,7 @@ module.exports = router;
 router.get("/", getSchedule);
 router.get("/specialties", getSpecialties);
 router.get("/week", getWeekday);
+router.get("/management", getScheduleTimes);
 
 /** @POST **/
 router.post("/register-service", setNewService);
@@ -34,3 +37,4 @@ router.put("/service", updateService);
 /** @DELETE **/
 router.delete("/category", deleteCategory);
 router.delete("/service", deleteService);
+router.delete("/management", deleteScheduleTime);

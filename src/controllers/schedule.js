@@ -220,6 +220,56 @@ exports.getWeekday = async (req, res, next) => {
   }
 };
 
+exports.getScheduleTimes = async (req, res) => {
+  const sql = `
+    SELECT
+    a.id_atendimento AS schedule_id,
+    a.id_cliente AS client_id,
+    u.nome AS client_name,
+    us.nome AS barber_name,
+    a.id_servico AS service_id,
+    s.nome_servico AS name_service,
+    a.id_status_atendimento AS status_service,
+    sa.status,
+    a.dia_da_semana AS weekday,
+    sem.dia AS weekday_name,
+    a.data AS date,
+    a.horario AS time
+    FROM agenda AS a
+    INNER JOIN usuarios AS u
+    ON u.id_usuario = a.id_cliente
+    INNER JOIN usuarios AS us
+    ON us.id_usuario = a.id_barbeiro
+    INNER JOIN servicos AS s
+    ON s.id_servico = a.id_servico
+    INNER JOIN status_atendimento AS sa
+    ON sa.id_status = a.id_status_atendimento
+    INNER JOIN semana AS sem
+    ON sem.id = a.dia_da_semana
+    ORDER BY data DESC, horario`;
+  const result = await dbConn.execute(sql);
+
+  function dateFormat(date) {
+    return date ? new Date(date).toLocaleString("pt-BR").slice(0, 10) : "";
+  }
+
+  let day;
+  const allResults = [];
+  result.forEach((value) => {
+    if (String(day) === String(value.date)) {
+      allResults[allResults.length - 1].schedules.push(value);
+    } else {
+      allResults.push({
+        date: dateFormat(value.date),
+        schedules: [value],
+      });
+    }
+    day = value.date;
+  });
+
+  return res.status(200).send(allResults);
+};
+
 exports.setService = async (req, res, next) => {
   try {
     const sql = ` INSERT INTO servicos SET ? `;
@@ -365,6 +415,20 @@ exports.setNewService = async (req, res) => {
     return res.status(200).send({
       message: "Registro gravado com sucesso",
     });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+exports.deleteScheduleTime = async (req, res) => {
+  try {
+    const { schedule_id } = req.body;
+    const sql = `DELETE FROM agenda WHERE id_atendimento = "${schedule_id}"`;
+    await dbConn.execute(sql);
+    return res.status(200).send({ message: "Registro excluído com sucesso" });
   } catch (error) {
     return res.status(500).send({
       message: "Ocorreu algum erro, entre em contato com o administrador",

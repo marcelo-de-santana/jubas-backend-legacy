@@ -3,10 +3,48 @@ const dbConn = require("../services/mysql");
 //MÉTODO RESPONSÁVEL POR RETORNAR TODOS OS USUÁRIOS
 exports.getAllUsers = async (req, res) => {
   try {
-    const sql = `SELECT id_usuario, cpf, nome, nivel_acesso, status_cadastro FROM usuarios ORDER BY nome`;
+    const sql = `
+    SELECT 
+      u.id_usuario AS user_id,
+      u.cpf,
+      u.nome AS name,
+      u.email,
+      u.data_de_nascimento AS birthday,
+      u.telefone AS phone,
+      u.status_cadastro AS status_registration,
+      u.nivel_acesso AS level,
+      p.descricao AS description
+    FROM usuarios AS u
+    INNER JOIN permissoes_acesso AS p
+    ON u.nivel_acesso = p.nivel
+    ORDER BY nome`;
     const results = await dbConn.execute(sql);
 
-    res.status(200).send(results);
+    function dateFormat(date) {
+      return date ? new Date(date).toLocaleString("pt-BR").slice(0, 10) : "";
+    }
+
+    const allResults = results.map((value) => ({
+      ...value,
+      birthday: dateFormat(value.birthday),
+    }));
+
+    return res.status(200).send(allResults);
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+exports.getAccessLevels = async (req, res) => {
+  try {
+    const sql = `
+      SELECT nivel AS level, descricao AS description
+      FROM permissoes_acesso `;
+    const result = await dbConn.execute(sql);
+    return res.status(200).send(result);
   } catch (error) {
     return res.status(500).send({
       message: "Ocorreu algum erro, entre em contato com o administrador",
@@ -20,7 +58,13 @@ exports.searchUserAndPassword = async (req, res) => {
   try {
     const sql = `
         SELECT
-            id_usuario AS ID, CPF, nome AS NAME, nivel_acesso AS LEVEL
+            id_usuario AS ID,
+            CPF,
+            EMAIL,
+            nome AS NAME,
+            nivel_acesso AS LEVEL,
+            telefone AS PHONE,
+            data_de_nascimento AS BIRTHDAY
             FROM usuarios
             WHERE cpf = ? AND senha = ? AND status_cadastro = 1`;
     const params = [req.body.cpf, req.body.password];
@@ -127,20 +171,64 @@ exports.recoveryPass = async (req, res) => {
   }
 };
 
+exports.updateAccount = async (req, res) => {
+  try {
+    const { cpf } = req.params;
+    const { NAME, EMAIL, PHONE, PASSWORD } = req.body;
+    let sql = `
+      SELECT COUNT(*) AS value FROM usuarios
+      WHERE cpf = "${cpf}" AND senha = "${PASSWORD}"`;
+    let result = await dbConn.execute(sql);
+    if (result[0].value !== 1) {
+      return res.status(401).send({ message: "Usuário ou senha incorretos" });
+    }
+    sql = `
+    UPDATE usuarios SET
+    nome = "${NAME}", email = "${EMAIL}", telefone = "${PHONE}"
+    WHERE cpf = "${cpf}"`;
+    result = await dbConn.execute(sql);
+    return res.status(200).send({ message: "Registro gravado com sucesso" });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
 exports.updateUser = async (req, res) => {
   try {
-    const sql = `UPDATE usuarios SET ? WHERE id_usuario = "${req.body.user_id}"`;
+    const { user_id, cpf, name, email, birthday, phone, status_registration } =
+      req.body;
+    const sql = `UPDATE usuarios SET ? WHERE id_usuario = "${user_id}"`;
     const params = {
-      cpf: req.body.cpf,
-      nome: req.body.name,
-      email: req.body.email,
-      telefone: req.body.phoneNumber,
-      data_de_nascimento: req.body.birthday,
+      cpf: cpf,
+      nome: name,
+      email: email,
+      telefone: phone,
+      data_de_nascimento: new Date(birthday),
+      status_cadastro: status_registration,
     };
     await dbConn.execute(sql, params);
 
     return res.status(200).send({
-      message: "Dados atualizados com sucesso",
+      message: "Registro gravado com sucesso",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Ocorreu algum erro, entre em contato com o administrador",
+      errorMessage: error,
+    });
+  }
+};
+
+exports.updateUserAccessLevel = async (req, res) => {
+  try {
+    const { userId, userLevel } = req.body;
+    const sql = `UPDATE usuarios SET nivel_acesso = "${userLevel}" WHERE id_usuario = "${userId}"`;
+    await dbConn.execute(sql);
+    return res.status(200).send({
+      message: "Registro gravado com sucesso",
     });
   } catch (error) {
     return res.status(500).send({
@@ -151,11 +239,11 @@ exports.updateUser = async (req, res) => {
 };
 
 //MÉTODO RESPONSÁVEL POR EXCUIR UM USUÁRIO
-exports.deleteUser = async (req, res, next) => {
+exports.deleteUser = async (req, res) => {
   try {
-    const sql = `DELETE FROM usuarios WHERE id_usuario = "${req.body.user_id}"`;
+    const { user_id } = req.body;
+    const sql = `DELETE FROM usuarios WHERE id_usuario = "${user_id}"`;
     await dbConn.execute(sql);
-
     return res.status(200).send({ message: "Registro deletado com sucesso" });
   } catch (error) {
     return res.status(500).send({
