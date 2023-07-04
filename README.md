@@ -14,7 +14,8 @@ Rename the **".env.example"** file to **".env"** and fill in the required data.
 - ExpressJS
 - Morgan
 - MySQL
-- Nodemon  
+- Nodemon
+- Docker  
 
 ### About
 This project was completed as part of the coursework for the Information Systems Graduation program.
