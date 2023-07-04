@@ -12,7 +12,7 @@ const {
   deleteBarber,
   deleleBarberHour,
   deleteBarberSpecialty,
-} = require("../controllers/barber");
+} = require("../controllers/barberController");
 
 module.exports = router;
 

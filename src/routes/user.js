@@ -11,7 +11,7 @@ const {
   updateUser,
   updateUserAccessLevel,
   deleteUser,
-} = require("../controllers/user");
+} = require("../controllers/userController");
 
 module.exports = router;
 

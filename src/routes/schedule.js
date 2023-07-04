@@ -15,7 +15,7 @@ const {
   deleteCategory,
   setNewService,
   deleteScheduleTime,
-} = require("../controllers/schedule");
+} = require("../controllers/scheduleController");
 
 module.exports = router;
 
